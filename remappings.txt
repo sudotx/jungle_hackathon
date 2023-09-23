@@ -1,0 +1,9 @@
+create3-factory/=lib/create3-factory/
+ds-test/=lib/forge-std/lib/ds-test/src/
+forge-std/=lib/forge-std/src/
+solmate/=lib/solmate/src/
+lib/create3-factory:ds-test/=lib/create3-factory/lib/forge-std/lib/ds-test/src/
+lib/create3-factory:forge-std/=lib/create3-factory/lib/forge-std/src/
+lib/create3-factory:solmate/=lib/create3-factory/lib/solmate/src/
+lib/forge-std:ds-test/=lib/forge-std/lib/ds-test/src/
+lib/solmate:ds-test/=lib/solmate/lib/ds-test/src/
