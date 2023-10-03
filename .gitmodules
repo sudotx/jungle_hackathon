@@ -7,3 +7,6 @@
 [submodule "lib/create3-factory"]
 	path = lib/create3-factory
 	url = https://github.com/zeframlou/create3-factory
+[submodule "lib/yearn-vaults"]
+	path = lib/yearn-vaults
+	url = https://github.com/yearn/yearn-vaults
