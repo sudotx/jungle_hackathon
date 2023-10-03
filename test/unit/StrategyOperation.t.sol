@@ -2,8 +2,8 @@
 pragma solidity ^0.8.12;
 import "forge-std/console.sol";
 
-import {StrategyFixture} from "./utils/StrategyFixture.sol";
-import {StrategyParams} from "../interfaces/Vault.sol";
+import {StrategyFixture} from "../utils/StrategyFixture.sol";
+import {StrategyParams} from "../../src/interfaces/Vault.sol";
 
 contract StrategyOperationsTest is StrategyFixture {
     // setup is run on before each test
