@@ -105,14 +105,7 @@ contract Vault is ERC4626, ReentrancyGuard{
 
     /*///////////////////////////////////////////////////////////////
                         INTERNAL HOOKS LOGIC
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice Example usage of hook. Pull funds from strategy to Vault if needed.
-    /// Withdraw at least requested amount to the Vault. Covers withdraw/performance fees of strat. Leaves dust tokens.
-    function beforeWithdraw(uint256 amount) internal {
-        uint256 _withdraw = (amount + ((amount * 50) / 10000));
-        // IController(controller).withdraw(address(asset), _withdraw);
-    }
+    //////////////////////////////////////////////////////////////*/ 
 
 
     /*///////////////////////////////////////////////////////////////

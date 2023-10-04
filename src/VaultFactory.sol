@@ -54,7 +54,7 @@ contract VaultFactory is Auth {
         vaultNumber = index;
         vaultDeploymentName = name;
 
-        // Deploy the LendingPool using the CREATE2 opcode.
+        // Deploy the Vault using the CREATE2 opcode.
         vault = new Vault{salt: bytes32(index)}(ERC20(msg.sender), "", "");
 
         // Emit the event.
