@@ -9,9 +9,7 @@ import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 import {SafeCastLib} from "solmate/utils/SafeCastLib.sol";
 
-
 import {VaultFactory} from "./VaultFactory.sol";
-
 
 contract Vault is ERC4626, ReentrancyGuard{
     using SafeTransferLib for ERC20;

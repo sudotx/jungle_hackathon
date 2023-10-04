@@ -2,27 +2,28 @@
 pragma solidity ^0.8.12;
 pragma abicoder v2;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ExtendedTest} from "./ExtendedTest.sol";
-import {Vm} from "forge-std/Vm.sol";
-import {IVault} from "../../interfaces/Vault.sol";
+import {Vm} from "../../lib/forge-std/src/Vm.sol";
+
+import {IVault} from "../../src/interfaces/Vault.sol";
+
+import {ERC20} from "../../lib/solmate/src/tokens/ERC20.sol";
 
 // NOTE: if the name of the strat or file changes this needs to be updated
-import {Strategy} from "../../Strategy.sol";
+import {Strategy} from "../../src/strategies/YearnStrategy.sol";
 
 // Artifact paths for deploying from the deps folder, assumes that the command is run from
 // the project root.
 string constant vaultArtifact = "artifacts/Vault.json";
 
+
 // Base fixture deploying Vault
-contract StrategyFixture is ExtendedTest {
-    using SafeERC20 for IERC20;
+contract StrategyFixture {
+    using ERC20 for ERC20;
 
     IVault public vault;
     Strategy public strategy;
-    IERC20 public weth;
-    IERC20 public want;
+    ERC20 public weth;
+    ERC20 public want;
 
     mapping(string => address) public tokenAddrs;
     mapping(string => uint256) public tokenPrices;
@@ -54,8 +55,8 @@ contract StrategyFixture is ExtendedTest {
 
         // Choose a token from the tokenAddrs mapping, see _setTokenAddrs for options
         string memory token = "DAI";
-        weth = IERC20(tokenAddrs["WETH"]);
-        want = IERC20(tokenAddrs[token]);
+        weth = ERC20(tokenAddrs["WETH"]);
+        want = ERC20(tokenAddrs[token]);
 
         (address _vault, address _strategy) = deployVaultAndStrategy(
             address(want),
