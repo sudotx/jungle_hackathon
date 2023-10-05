@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import {Vault} from "./Vault.sol";
 
@@ -8,9 +8,9 @@ import {Bytes32AddressLib} from "solmate/utils/Bytes32AddressLib.sol";
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
 
-/// @title Lending Pool Factory
+/// @title Vault Factory
 /// @author tx
-/// @notice Factory used to deploy isolated Vaults.
+/// @notice Factory used to deploy isolated Vaults for any ERC20 token.
 contract VaultFactory is Auth {
     using Bytes32AddressLib for address;
     using Bytes32AddressLib for bytes32;
@@ -25,16 +25,15 @@ contract VaultFactory is Auth {
     constructor(address _owner, Authority _authority) Auth(_owner, _authority) {}
 
     /*///////////////////////////////////////////////////////////////
-                        POOL DEPLOYMENT LOGIC
+                        VAULT DEPLOYMENT LOGIC
     //////////////////////////////////////////////////////////////*/
 
     /// @notice A counter indicating how many Vaults have been deployed.
     /// @dev This is used to generate the vault ID.
     uint256 public vaultNumber;
 
-    /// @dev When a new pool is deployed, it will retrieve the
-    /// value stored here. This enables the lending to be deployed to
-    /// an address that does not require the name to determine.
+    /// @dev When a new vault is deployed, it will retrieve the
+    /// value stored here.
     string public vaultDeploymentName;
 
     /// @notice Emitted when a new Vault is deployed.
@@ -44,54 +43,60 @@ contract VaultFactory is Auth {
 
     /// @notice Deploy a new Vault.
     /// @return vault The address of the newly deployed vault.
-    function deployVault(string memory name) external returns (Vault vault, uint256 index) {
+    function deployVault(ERC20 underlying) external returns (Vault vault, uint256 index) {
         // Calculate pool ID.
-        
+
         // Unchecked is safe here because index will never reach type(uint256).max
-        unchecked { index = vaultNumber + 1; }
+        unchecked {
+            index = vaultNumber + 1;
+        }
 
         // Update state variables.
         vaultNumber = index;
-        vaultDeploymentName = name;
 
         // Deploy the Vault using the CREATE2 opcode.
-        vault = new Vault{salt: bytes32(index)}(ERC20(msg.sender), "", "");
+        vault = new Vault{salt: address(underlying).fillLast12Bytes()}(underlying, "", "");
 
         // Emit the event.
         emit VaultDeployed(index, vault, msg.sender);
-
-        // Reset the deployment name.
-        delete vaultDeploymentName;
     }
 
     /*///////////////////////////////////////////////////////////////
-                        POOL RETRIEVAL LOGIC
+                        VAULT RETRIEVAL LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Get the address of a pool given its ID.
-    function getVaultFromNumber(uint256 id) external view returns (Vault vault) {
-        // Retrieve the lending pool.
-        return
-            Vault(
-                payable(
-                    keccak256(
-                        abi.encodePacked(
-                            // Prefix:
-                            bytes1(0xFF),
-                            // Creator:
-                            address(this),
-                            // Salt:
-                            bytes32(id),
-                            // Bytecode hash:
-                            keccak256(
-                                abi.encodePacked(
-                                    // Deployment bytecode:
-                                    type(Vault).creationCode
-                                )
-                            )
-                        )
-                    ).fromLast20Bytes() // Convert the CREATE2 hash into an address.
-                )
-            );
+    /// @notice Computes a Vault's address from its accepted underlying token.
+    /// @param underlying The ERC20 token that the Vault should accept.
+    /// @return The address of a Vault which accepts the provided underlying token.
+    /// @dev The Vault returned may not be deployed yet. Use isVaultDeployed to check.
+    /// @dev Order is important here:
+    /// Prefix
+    /// Creator
+    /// Salt
+    /// Bytecode hash
+    /// Deployment bytecode
+    /// Constructor arguments
+    function getVaultFromUnderlying(ERC20 underlying) external view returns (Vault) {
+        return Vault(
+            payable(
+                keccak256(
+                    abi.encodePacked(
+                        bytes1(0xFF),
+                        address(this),
+                        address(underlying).fillLast12Bytes(),
+                        keccak256(abi.encodePacked(type(Vault).creationCode, abi.encode(underlying)))
+                    )
+                ).fromLast20Bytes() // Convert the CREATE2 hash into an address.
+            )
+        );
+    }
+
+    /// @notice Returns if a Vault at an address has already been deployed.
+    /// @param vault The address of a Vault which may not have been deployed yet.
+    /// @return A boolean indicating whether the Vault has been deployed already.
+    /// @dev This function is useful to check the return values of getVaultFromUnderlying,
+    /// as it does not check that the Vault addresses it computes have been deployed yet.
+    function isVaultDeployed(Vault vault) external view returns (bool) {
+        return address(vault).code.length > 0;
     }
 }

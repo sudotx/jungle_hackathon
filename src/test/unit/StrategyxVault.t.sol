@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity ^0.8.12;;
+pragma solidity ^0.8.12;
+
 import {Test} from "forge-std/Test.sol";
 import {Vault} from "../../src/Vault.sol";
 import {MockERC20} from "../mocks/MockERC20.sol";
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
-
-pragma solidity ^0.8.12;
-import "forge-std/console.sol";
 
 import {StrategyFixture} from "../utils/StrategyFixture.sol";
 import {StrategyParams} from "../../src/interfaces/Vault.sol";
@@ -33,7 +31,7 @@ contract VaultTest is Test, StrategyFixture {
         // Give Alice some mock tokens, ~$315k worth
         underlying.mint(alice, 2_000e18);
 
-       // setup vault 
+        // setup vault
         super.setUp();
     }
 
@@ -42,6 +40,7 @@ contract VaultTest is Test, StrategyFixture {
         vault.deposit(2000e18, alice);
     }
     /// @notice Create a safe, to use the created strategy
+
     function testCreateSafeWithStrategy() public {}
 
     function testSetupVaultOK() public {
@@ -261,11 +260,7 @@ contract VaultTest is Test, StrategyFixture {
         assertEq(weth.balanceOf(user), 0);
         vm.prank(gov);
         strategy.sweep(address(weth));
-        assertRelApproxEq(
-            weth.balanceOf(gov),
-            wethAmount + beforeBalance,
-            DELTA
-        );
+        assertRelApproxEq(weth.balanceOf(gov), wethAmount + beforeBalance, DELTA);
     }
 
     function testTriggers(uint256 _amount) public {
@@ -286,5 +281,4 @@ contract VaultTest is Test, StrategyFixture {
         strategy.harvestTrigger(0);
         strategy.tendTrigger(0);
     }
-
 }
